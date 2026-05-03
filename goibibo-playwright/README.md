@@ -88,7 +88,7 @@ npx playwright install --with-deps
 
 ### To run from Scratch
 ```bash
-bashunzip goibibo-playwright-framework.zip && cd goibibo-playwright
+unzip goibibo-playwright-framework.zip && cd goibibo-playwright
 npm install
 npx playwright install --with-deps
 npm test                         # runs all 4 scenarios
