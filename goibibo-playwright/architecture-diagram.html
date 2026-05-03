@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Goibibo Playwright Framework — Architecture Diagram</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --bg: #050810;
+  --surface: #0d1117;
+  --card: #161b22;
+  --border: #21262d;
+  --glow: #30363d;
+  --blue: #58a6ff;
+  --green: #3fb950;
+  --purple: #bc8cff;
+  --orange: #ff7b72;
+  --yellow: #e3b341;
+  --cyan: #39d353;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --dim: #484f58;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 40px 32px;
+  overflow-x: hidden;
+}
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(88,166,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(88,166,255,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; }
+
+/* Header */
+.header { text-align: center; margin-bottom: 52px; }
+.header .badge {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(88,166,255,.15), rgba(188,140,255,.15));
+  border: 1px solid rgba(88,166,255,.3);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: .72rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--blue);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  background: linear-gradient(135deg, #e6edf3 0%, #58a6ff 60%, #bc8cff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+}
+.header p { color: var(--muted); font-size: .9rem; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+
+/* Tech chips */
+.tech-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 24px 0 52px;
+}
+.chip {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: .72rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  border: 1px solid;
+}
+.chip.blue   { background: rgba(88,166,255,.1);  border-color: rgba(88,166,255,.4);  color: var(--blue);   }
+.chip.green  { background: rgba(63,185,80,.1);   border-color: rgba(63,185,80,.4);   color: var(--green);  }
+.chip.purple { background: rgba(188,140,255,.1); border-color: rgba(188,140,255,.4); color: var(--purple); }
+.chip.orange { background: rgba(255,123,114,.1); border-color: rgba(255,123,114,.4); color: var(--orange); }
+.chip.yellow { background: rgba(227,179,65,.1);  border-color: rgba(227,179,65,.4);  color: var(--yellow); }
+.chip.cyan   { background: rgba(57,211,83,.1);   border-color: rgba(57,211,83,.4);   color: var(--cyan);   }
+
+/* Section labels */
+.section-label {
+  font-size: .68rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Main architecture flow */
+.arch-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 52px;
+}
+
+/* Layer rows */
+.layer {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  position: relative;
+}
+.layer + .layer { margin-top: 8px; }
+
+/* Connector arrows between layers */
+.layer-connector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 32px;
+  color: var(--dim);
+  font-size: 1.1rem;
+  position: relative;
+}
+.layer-connector::before,
+.layer-connector::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 12px;
+  background: linear-gradient(to bottom, var(--border), transparent);
+  left: 50%;
+}
+.layer-connector::before { top: 0; }
+.layer-connector::after  { bottom: 0; transform: scaleY(-1); }
+
+/* Layer label */
+.layer-tag {
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: .6rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--dim);
+  padding: 8px 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+/* Boxes */
+.box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.box:hover {
+  border-color: var(--glow);
+  transform: translateY(-1px);
+}
+.box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 10px 10px 0 0;
+}
+.box.blue::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+.box.green::before  { background: linear-gradient(90deg, var(--green), transparent); }
+.box.purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+.box.orange::before { background: linear-gradient(90deg, var(--orange), transparent); }
+.box.yellow::before { background: linear-gradient(90deg, var(--yellow), transparent); }
+.box.cyan::before   { background: linear-gradient(90deg, var(--cyan), transparent); }
+
+.box-title {
+  font-size: .78rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.box.blue   .box-title { color: var(--blue); }
+.box.green  .box-title { color: var(--green); }
+.box.purple .box-title { color: var(--purple); }
+.box.orange .box-title { color: var(--orange); }
+.box.yellow .box-title { color: var(--yellow); }
+.box.cyan   .box-title { color: var(--cyan); }
+
+.box-items {
+  list-style: none;
+  font-size: .72rem;
+  color: var(--muted);
+  line-height: 1.8;
+  font-family: 'JetBrains Mono', monospace;
+}
+.box-items li::before { content: '▸ '; color: var(--dim); }
+.box-items li.file  { color: var(--text); }
+.box-items li.file::before { content: '📄 '; }
+
+/* CI/CD pipeline section */
+.pipeline {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 52px;
+  overflow: hidden;
+  position: relative;
+}
+.pipeline::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--orange), var(--yellow), var(--green));
+}
+.pipeline-title {
+  font-size: .9rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--yellow);
+}
+
+.pipeline-flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.pipeline-step {
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 120px;
+  text-align: center;
+  position: relative;
+}
+.pipeline-step .step-icon { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+.pipeline-step .step-name { font-size: .72rem; font-weight: 600; color: var(--text); }
+.pipeline-step .step-desc { font-size: .62rem; color: var(--muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+.pipeline-step.trigger { border-color: rgba(88,166,255,.5); }
+.pipeline-step.lint    { border-color: rgba(227,179,65,.5); }
+.pipeline-step.chrome  { border-color: rgba(63,185,80,.5); }
+.pipeline-step.firefox { border-color: rgba(57,211,83,.5); }
+.pipeline-step.report  { border-color: rgba(188,140,255,.5); }
+
+.arrow {
+  font-size: 1rem;
+  color: var(--dim);
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.fork {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Data flow section */
+.data-flow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 52px;
+}
+.data-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+.data-card-title {
+  font-size: .78rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.data-card-body {
+  font-size: .7rem;
+  color: var(--muted);
+  line-height: 1.7;
+  font-family: 'JetBrains Mono', monospace;
+}
+.data-card-body strong { color: var(--text); }
+
+/* File tree */
+.file-tree {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 52px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .75rem;
+  line-height: 2;
+}
+.tree-title {
+  font-size: .9rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.t-dir   { color: var(--blue); font-weight: 600; }
+.t-ts    { color: var(--green); }
+.t-yml   { color: var(--orange); }
+.t-json  { color: var(--yellow); }
+.t-xlsx  { color: var(--cyan); }
+.t-html  { color: var(--purple); }
+.t-env   { color: var(--muted); }
+.t-note  { color: var(--dim); font-style: italic; }
+.indent1 { padding-left: 20px; }
+.indent2 { padding-left: 40px; }
+.indent3 { padding-left: 60px; }
+.indent4 { padding-left: 80px; }
+
+/* Legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+  color: var(--muted);
+}
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="badge">Aperture Enterprises · Client A · goibibo.com</div>
+    <h1>Playwright Framework Architecture</h1>
+    <p>Hybrid Test Automation Framework built with Page Object Model, TypeScript, Excel Data-Driven Testing, Custom Extent Reports, and GitHub Actions CI/CD</p>
+  </div>
+
+  <!-- Tech Stack Chips -->
+  <div class="tech-bar">
+    <span class="chip blue">Playwright v1.44</span>
+    <span class="chip blue">TypeScript 5.4</span>
+    <span class="chip green">Page Object Model</span>
+    <span class="chip green">Data-Driven (Excel)</span>
+    <span class="chip purple">Extent Reports</span>
+    <span class="chip purple">HTML + JUnit XML</span>
+    <span class="chip orange">GitHub Actions CI/CD</span>
+    <span class="chip yellow">Chromium + Firefox</span>
+    <span class="chip cyan">VS Code Debug</span>
+  </div>
+
+  <!-- Architecture Layers -->
+  <div class="section-label">Architecture Layers</div>
+
+  <div class="arch-flow">
+
+    <!-- Layer 1: Test Data -->
+    <div class="layer">
+      <div class="layer-tag">INPUT</div>
+      <div class="box yellow" style="flex:1.2">
+        <div class="box-title">📊 Test Data Layer</div>
+        <ul class="box-items">
+          <li class="file">test-data/TestData.xlsx</li>
+          <li>Sheet: HotelSearch (3 test cases)</li>
+          <li>Sheet: BookHotel (2 test cases)</li>
+          <li>Sheet: HotelFilter (2 test cases)</li>
+          <li>ExcelReader.ts → typed interfaces</li>
+          <li>createTestData.ts → auto-generates xlsx</li>
+        </ul>
+      </div>
+      <div class="box cyan" style="flex:1">
+        <div class="box-title">⚙️ Configuration</div>
+        <ul class="box-items">
+          <li class="file">testConfig.ts</li>
+          <li class="file">.env</li>
+          <li>BASE_URL, HEADLESS</li>
+          <li>Guest details</li>
+          <li>Card details (dummy)</li>
+          <li>Filter parameters</li>
+        </ul>
+      </div>
+      <div class="box blue" style="flex:1">
+        <div class="box-title">🔧 Utilities</div>
+        <ul class="box-items">
+          <li class="file">dateHelper.ts</li>
+          <li class="file">logger.ts</li>
+          <li class="file">fixtures.ts</li>
+          <li>getFutureDate(offset)</li>
+          <li>TestNG-style Reporter.log</li>
+          <li>PW fixture injection</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="layer-connector">↓</div>
+
+    <!-- Layer 2: Page Objects -->
+    <div class="layer">
+      <div class="layer-tag">POM</div>
+      <div class="box green" style="flex:0.7">
+        <div class="box-title">🏗️ BasePage</div>
+        <ul class="box-items">
+          <li>navigateTo()</li>
+          <li>clickElement()</li>
+          <li>fillInput()</li>
+          <li>assertVisible()</li>
+          <li>assertText()</li>
+          <li>scrollToElement()</li>
+          <li>takeScreenshot()</li>
+          <li>pressKey()</li>
+        </ul>
+      </div>
+      <div class="box green">
+        <div class="box-title">🏠 HomePage</div>
+        <ul class="box-items">
+          <li>open()</li>
+          <li>clickHotelsMenu()</li>
+          <li>enterLocation()</li>
+          <li>selectCheckInDate()</li>
+          <li>selectCheckOutDate()</li>
+          <li>setAdults(count)</li>
+          <li>clickGetSetGo()</li>
+          <li>searchHotel({...})</li>
+        </ul>
+      </div>
+      <div class="box green">
+        <div class="box-title">📋 HotelListPage</div>
+        <ul class="box-items">
+          <li>waitForResults()</li>
+          <li>getFirstHotelName()</li>
+          <li>getAllHotelNames()</li>
+          <li>getTotalHotelCount()</li>
+          <li>applyPayAtHotelFilter()</li>
+          <li>applyRatingFilter(n)</li>
+          <li>applyPriceRangeFilter(i)</li>
+          <li>clickFirstHotel()</li>
+        </ul>
+      </div>
+      <div class="box green">
+        <div class="box-title">🏨 HotelDetailPage</div>
+        <ul class="box-items">
+          <li>getHotelName()</li>
+          <li>clickRoomsRatesTab()</li>
+          <li>clickLocationTab()</li>
+          <li>clickGuestReviewsTab()</li>
+          <li>clickQuestionsAnswersTab()</li>
+          <li>clickHotelPoliciesTab()</li>
+          <li>getFirstRoomImageSrc()</li>
+          <li>clickBookNow()</li>
+        </ul>
+      </div>
+      <div class="box green">
+        <div class="box-title">💳 BookingPage</div>
+        <ul class="box-items">
+          <li>getBookingHotelName()</li>
+          <li>verifyBookingDetails()</li>
+          <li>fillGuestDetails({...})</li>
+          <li>clickPayButton()</li>
+          <li>fillCardDetails({...})</li>
+          <li>clickPayNow()</li>
+          <li>getPaymentErrorMessage()</li>
+          <li>waitForErrorAndLog()</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="layer-connector">↓</div>
+
+    <!-- Layer 3: Tests -->
+    <div class="layer">
+      <div class="layer-tag">TESTS</div>
+      <div class="box purple">
+        <div class="box-title">🔍 Scenario 1</div>
+        <ul class="box-items">
+          <li class="file">searchHotel.spec.ts</li>
+          <li>Search hotel 1 adult</li>
+          <li>Log hotel name (TestNG)</li>
+          <li>Verify hotel count &gt; 0</li>
+          <li>Data-driven (Excel)</li>
+        </ul>
+      </div>
+      <div class="box purple">
+        <div class="box-title">🛎️ Scenario 2</div>
+        <ul class="box-items">
+          <li class="file">bookHotel.spec.ts</li>
+          <li>Book Ooty stay &gt;1 night</li>
+          <li>Fill dummy card details</li>
+          <li>Assert error message shown</li>
+          <li>Data-driven (Excel)</li>
+        </ul>
+      </div>
+      <div class="box purple">
+        <div class="box-title">📑 Scenario 3</div>
+        <ul class="box-items">
+          <li class="file">hotelDetails.spec.ts</li>
+          <li>Click first hotel</li>
+          <li>Verify Rooms &amp; Rates tab</li>
+          <li>Verify Location tab</li>
+          <li>Verify Guest Reviews tab</li>
+          <li>Verify Q&amp;A + Policies tabs</li>
+        </ul>
+      </div>
+      <div class="box purple">
+        <div class="box-title">🔧 Scenario 4</div>
+        <ul class="box-items">
+          <li class="file">filterHotel.spec.ts</li>
+          <li>Apply Pay At Hotel filter</li>
+          <li>Apply Rating = 4 filter</li>
+          <li>Apply Price Range filter</li>
+          <li>Verify count changes</li>
+          <li>Data-driven (Excel)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="layer-connector">↓</div>
+
+    <!-- Layer 4: Reports -->
+    <div class="layer">
+      <div class="layer-tag">OUTPUT</div>
+      <div class="box orange">
+        <div class="box-title">📊 Extent Report (Custom)</div>
+        <ul class="box-items">
+          <li class="file">extentReporter.ts</li>
+          <li class="file">reports/extent-report.html</li>
+          <li>Pass/Fail dashboard</li>
+          <li>Per-test step logs</li>
+          <li>Inline screenshots</li>
+          <li>Pass rate progress bar</li>
+        </ul>
+      </div>
+      <div class="box orange">
+        <div class="box-title">🎭 Playwright HTML</div>
+        <ul class="box-items">
+          <li class="file">reports/playwright-html/</li>
+          <li>Full trace viewer</li>
+          <li>Screenshots on failure</li>
+          <li>Video replay</li>
+          <li>Step timeline</li>
+        </ul>
+      </div>
+      <div class="box orange">
+        <div class="box-title">📋 JUnit XML</div>
+        <ul class="box-items">
+          <li class="file">reports/results.xml</li>
+          <li>TestNG-compatible format</li>
+          <li>CI/CD parseable</li>
+          <li>Jira Zephyr import</li>
+          <li>Azure DevOps support</li>
+        </ul>
+      </div>
+      <div class="box orange">
+        <div class="box-title">🔍 Logger</div>
+        <ul class="box-items">
+          <li class="file">logger.ts</li>
+          <li>TestNG Reporter.log() equiv</li>
+          <li>INFO / WARN / PASS / FAIL</li>
+          <li>Timestamps on each line</li>
+          <li>Attached to PW report</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- /arch-flow -->
+
+  <!-- CI/CD Pipeline -->
+  <div class="section-label">CI/CD Pipeline — GitHub Actions</div>
+  <div class="pipeline">
+    <div class="pipeline-title">⚡ .github/workflows/playwright.yml</div>
+    <div class="pipeline-flow">
+      <div class="pipeline-step trigger">
+        <span class="step-icon">🚀</span>
+        <div class="step-name">Trigger</div>
+        <div class="step-desc">push/PR/manual</div>
+      </div>
+      <span class="arrow">→</span>
+      <div class="pipeline-step lint">
+        <span class="step-icon">🔍</span>
+        <div class="step-name">Lint &amp; Types</div>
+        <div class="step-desc">tsc --noEmit</div>
+      </div>
+      <span class="arrow">→</span>
+      <div class="fork">
+        <div class="pipeline-step chrome">
+          <span class="step-icon">🟢</span>
+          <div class="step-name">Chromium Tests</div>
+          <div class="step-desc">4 scenarios</div>
+        </div>
+        <div class="pipeline-step firefox">
+          <span class="step-icon">🟠</span>
+          <div class="step-name">Firefox Tests</div>
+          <div class="step-desc">4 scenarios</div>
+        </div>
+      </div>
+      <span class="arrow">→</span>
+      <div class="pipeline-step report">
+        <span class="step-icon">📊</span>
+        <div class="step-name">Publish Reports</div>
+        <div class="step-desc">HTML + XML artifacts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Flow -->
+  <div class="section-label">Data Flow — Excel → Tests → Reports</div>
+  <div class="data-flow">
+    <div class="data-card">
+      <div class="data-card-title" style="color:var(--yellow)">📊 Excel Input</div>
+      <div class="data-card-body">
+        <strong>createTestData.ts</strong> generates<br>
+        <strong>TestData.xlsx</strong> with 3 sheets<br><br>
+        Each row = 1 test case<br>
+        Add rows → more test runs<br>
+        Fallback: config defaults
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-title" style="color:var(--cyan)">⚙️ ExcelReader</div>
+      <div class="data-card-body">
+        <strong>ExcelReader.getSheetData&lt;T&gt;()</strong><br>
+        Type-safe row objects<br><br>
+        HotelSearchData<br>
+        BookHotelData<br>
+        HotelFilterData
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-title" style="color:var(--blue)">🔄 Test Loop</div>
+      <div class="data-card-body">
+        <strong>for (const row of testRows)</strong><br>
+        Playwright creates 1 test<br>
+        per Excel row automatically<br><br>
+        Dynamic test names include<br>
+        TestCaseId + Description
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-title" style="color:var(--green)">🌐 Page Objects</div>
+      <div class="data-card-body">
+        <strong>Row data → POM methods</strong><br>
+        homePage.searchHotel({...})<br>
+        bookPage.fillCardDetails({...})<br>
+        listPage.applyRatingFilter(n)<br><br>
+        Full separation of concerns
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-title" style="color:var(--purple)">📊 Reporting</div>
+      <div class="data-card-body">
+        <strong>report.logHotelList()</strong><br>
+        Mirrors TestNG Reporter.log()<br><br>
+        Screenshots attached inline<br>
+        JSON data attached<br>
+        Annotations on test
+      </div>
+    </div>
+  </div>
+
+  <!-- File Tree -->
+  <div class="section-label">Project File Structure</div>
+  <div class="file-tree">
+    <div class="tree-title">📁 goibibo-playwright/</div>
+    <div class="indent1"><span class="t-dir">📁 src/</span></div>
+    <div class="indent2"><span class="t-dir">📁 config/</span></div>
+    <div class="indent3"><span class="t-ts">testConfig.ts</span> <span class="t-note">— central config + env vars</span></div>
+    <div class="indent2"><span class="t-dir">📁 pages/</span> <span class="t-note">— Page Object Model</span></div>
+    <div class="indent3"><span class="t-ts">BasePage.ts</span> <span class="t-note">— abstract base: click, fill, assert, scroll</span></div>
+    <div class="indent3"><span class="t-ts">HomePage.ts</span> <span class="t-note">— hotel search form (location, dates, guests)</span></div>
+    <div class="indent3"><span class="t-ts">HotelListPage.ts</span> <span class="t-note">— results grid, filters, hotel names</span></div>
+    <div class="indent3"><span class="t-ts">HotelDetailPage.ts</span> <span class="t-note">— all 5 detail tabs + Book Now</span></div>
+    <div class="indent3"><span class="t-ts">BookingPage.ts</span> <span class="t-note">— guest form, payment, error message</span></div>
+    <div class="indent2"><span class="t-dir">📁 tests/</span></div>
+    <div class="indent3"><span class="t-ts">searchHotel.spec.ts</span> <span class="t-note">— Scenario 1: Search &amp; log hotel name</span></div>
+    <div class="indent3"><span class="t-ts">bookHotel.spec.ts</span> <span class="t-note">— Scenario 2: Book + dummy card error</span></div>
+    <div class="indent3"><span class="t-ts">hotelDetails.spec.ts</span> <span class="t-note">— Scenario 3: Detail page tabs</span></div>
+    <div class="indent3"><span class="t-ts">filterHotel.spec.ts</span> <span class="t-note">— Scenario 4: Apply &amp; verify filters</span></div>
+    <div class="indent2"><span class="t-dir">📁 utils/</span></div>
+    <div class="indent3"><span class="t-ts">logger.ts</span> <span class="t-note">— TestNG Reporter.log() equivalent</span></div>
+    <div class="indent3"><span class="t-ts">reportHelper.ts</span> <span class="t-note">— Extent-style: screenshots, steps, attach</span></div>
+    <div class="indent3"><span class="t-ts">extentReporter.ts</span> <span class="t-note">— Custom Playwright reporter → HTML</span></div>
+    <div class="indent3"><span class="t-ts">excelReader.ts</span> <span class="t-note">— xlsx wrapper + typed row interfaces</span></div>
+    <div class="indent3"><span class="t-ts">createTestData.ts</span> <span class="t-note">— generates TestData.xlsx</span></div>
+    <div class="indent3"><span class="t-ts">dateHelper.ts</span> <span class="t-note">— getFutureDate(offset) for calendar picker</span></div>
+    <div class="indent3"><span class="t-ts">fixtures.ts</span> <span class="t-note">— Playwright custom fixtures (DI pattern)</span></div>
+    <div class="indent3"><span class="t-ts">globalSetup.ts</span> <span class="t-note">— runs once before all tests</span></div>
+    <div class="indent3"><span class="t-ts">globalTeardown.ts</span> <span class="t-note">— runs once after all tests</span></div>
+    <div class="indent1"><span class="t-dir">📁 test-data/</span></div>
+    <div class="indent2"><span class="t-xlsx">TestData.xlsx</span> <span class="t-note">— HotelSearch | BookHotel | HotelFilter sheets</span></div>
+    <div class="indent1"><span class="t-dir">📁 reports/</span> <span class="t-note">— auto-generated</span></div>
+    <div class="indent2"><span class="t-html">extent-report.html</span> <span class="t-note">— custom Extent-style report</span></div>
+    <div class="indent2"><span class="t-dir">playwright-html/</span> <span class="t-note">— full Playwright HTML report</span></div>
+    <div class="indent2"><span class="t-json">results.xml</span> <span class="t-note">— JUnit XML (TestNG-compatible)</span></div>
+    <div class="indent2"><span class="t-json">results.json</span> <span class="t-note">— machine-readable JSON</span></div>
+    <div class="indent1"><span class="t-dir">📁 .github/workflows/</span></div>
+    <div class="indent2"><span class="t-yml">playwright.yml</span> <span class="t-note">— GitHub Actions: lint → chrome → firefox → publish</span></div>
+    <div class="indent1"><span class="t-dir">📁 .vscode/</span></div>
+    <div class="indent2"><span class="t-json">launch.json</span> <span class="t-note">— 5 debug configs (all tests + per scenario)</span></div>
+    <div class="indent2"><span class="t-json">extensions.json</span> <span class="t-note">— recommended VS Code extensions</span></div>
+    <div class="indent1"><span class="t-ts">playwright.config.ts</span> <span class="t-note">— globalSetup, reporters, browsers, timeouts</span></div>
+    <div class="indent1"><span class="t-json">tsconfig.json</span> <span class="t-note">— TypeScript strict mode</span></div>
+    <div class="indent1"><span class="t-json">package.json</span> <span class="t-note">— scripts: test, test:headed, test:scenario1..4, report</span></div>
+    <div class="indent1"><span class="t-env">.env</span> <span class="t-note">— BASE_URL, HEADLESS, GUEST_*, CARD_* (not committed)</span></div>
+    <div class="indent1"><span class="t-html">architecture-diagram.html</span> <span class="t-note">— this file</span></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Page Object Model (POM)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Test Specifications</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Test Data (Excel)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Reporting</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Utilities &amp; Helpers</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>Configuration</div>
+    <div class="legend-item" style="margin-left:auto;color:var(--dim);font-size:.65rem;font-family:'JetBrains Mono',monospace">
+      Aperture Enterprises · Goibibo Client A · Playwright + TypeScript
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

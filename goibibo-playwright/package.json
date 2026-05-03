@@ -1,0 +1,42 @@
+{
+  "name": "goibibo-playwright-framework",
+  "version": "1.0.0",
+  "description": "Hybrid Playwright + TypeScript Automation Framework — Goibibo (Client A) | POM + Excel Data-Driven + Extent Reports + GitHub Actions CI/CD",
+  "scripts": {
+    "pretest": "npx ts-node src/utils/createTestData.ts",
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:chrome": "npx playwright test --project=chromium",
+    "test:firefox": "npx playwright test --project=firefox",
+    "test:scenario1": "npx playwright test src/tests/searchHotel.spec.ts",
+    "test:scenario2": "npx playwright test src/tests/bookHotel.spec.ts",
+    "test:scenario3": "npx playwright test src/tests/hotelDetails.spec.ts",
+    "test:scenario4": "npx playwright test src/tests/filterHotel.spec.ts",
+    "test:debug": "npx playwright test --headed --timeout=0 --project=chromium",
+    "report": "npx playwright show-report reports/playwright-html",
+    "report:extent": "open reports/extent-report.html",
+    "generate-data": "npx ts-node src/utils/createTestData.ts",
+    "build": "tsc --noEmit",
+    "lint": "echo 'TypeScript check...' && npx tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "@types/node": "^20.12.0",
+    "typescript": "^5.4.5",
+    "ts-node": "^10.9.2"
+  },
+  "keywords": [
+    "playwright", "typescript", "automation", "pom",
+    "goibibo", "selenium-certification", "data-driven", "extent-reports"
+  ],
+  "author": "Aperture Enterprises — QA Automation Division",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
