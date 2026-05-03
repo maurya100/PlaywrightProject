@@ -86,6 +86,15 @@ npm install
 npx playwright install --with-deps
 ```
 
+### To run from Scratch
+unzip goibibo-playwright-framework.zip && cd goibibo-playwright
+npm install
+npx playwright install --with-deps
+npm test                         # runs all 4 scenarios
+open reports/extent-report.html  # Extent-style report
+npm run report                   # Playwright HTML with trace/video
+
+
 ### 2. Generate Excel test data
 
 ```bash
